@@ -3,11 +3,11 @@ import { Table, TableBody, TableCell, TableFooter, TableRow, TablePagination } f
 import TablePaginationActions from './PaginationActions'
 import TableHeader from './TableHeader'
 
-const CustomPaginationTable = ({ rows, headers, total, onPageChange, onSortChange }) => {
+const CustomPaginationTable = ({ rows, headers, total, onPageChange, onSortChange, onCellClick }) => {
   const [page, setPage] = useState(0)
   const [order, setOrder] = useState('asc')
   const [orderBy, setOrderBy] = useState(headers[0].id)
-  const [rowsPerPage, setRowsPerPage] = useState(5)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length)
 
@@ -35,6 +35,10 @@ const CustomPaginationTable = ({ rows, headers, total, onPageChange, onSortChang
     })
   }
 
+  const _onCellClick = data => e => {
+    onCellClick(data)
+  }
+
   const renderTableCell = row => (header, index) => {
     let data = row[header.id]
 
@@ -50,6 +54,8 @@ const CustomPaginationTable = ({ rows, headers, total, onPageChange, onSortChang
         key={`cell_${index}`}
         align={header.numeric ? 'right' : 'left'}
         padding={header.disablePadding ? 'none' : 'default'}
+        className='cursor-pointer'
+        onClick={_onCellClick(row)}
       >
         {data}
       </TableCell>
