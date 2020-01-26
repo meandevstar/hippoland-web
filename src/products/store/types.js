@@ -1,0 +1,7 @@
+export default {
+  API_ATTEMPT: '@@products/API_ATTEMPT',
+  API_FAILURE: '@@products/API_FAILURE',
+
+  GET_PRODUCTS_SUCCESS: '@@products/GET_PRODUCTS_SUCCESS',
+  GET_PRODUCT_SUCCESS: '@@products/GET_PRODUCT_SUCCESS',
+} 
