@@ -1,11 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Table, TableBody, TableCell, TableFooter, TableRow, TablePagination } from '@material-ui/core'
 import TablePaginationActions from './PaginationActions'
+import TableHeader from './TableHeader'
 
-
-const CustomPaginationTable= ({ rows, total, onPageChange }) => {
-  const [page, setPage] = React.useState(0)
-  const [rowsPerPage, setRowsPerPage] = React.useState(5)
+const CustomPaginationTable = ({ rows, headers, total, onPageChange, onSortChange }) => {
+  const [page, setPage] = useState(0)
+  const [order, setOrder] = useState('asc')
+  const [orderBy, setOrderBy] = useState(headers[0].id)
+  const [rowsPerPage, setRowsPerPage] = useState(5)
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length)
 
@@ -16,23 +18,50 @@ const CustomPaginationTable= ({ rows, total, onPageChange }) => {
 
   const handleChangeRowsPerPage = e => {
     const limit = parseInt(e.target.value, 10)
+
     setRowsPerPage(limit)
     handleChangePage(null, 0, limit)
   }
 
+  const onRequestSort = property => {
+    const isDesc = orderBy === property && order === 'desc'
+    const newOrder = isDesc ? 'asc' : 'desc'
+
+    setOrder(newOrder)
+    setOrderBy(property)
+    onSortChange({
+      order: newOrder,
+      orderBy: property
+    })
+  }
+
+  const renderTableCell = row => (header, index) => {
+    let data = row[header.id]
+
+    if (header.numeric) {
+      data = +data
+    }
+    if (header.date) {
+      data = new Date(data).toLocaleString()
+    }
+
+    return (
+      <TableCell
+        key={`cell_${index}`}
+        align={header.numeric ? 'right' : 'left'}
+        padding={header.disablePadding ? 'none' : 'default'}
+      >
+        {data}
+      </TableCell>
+    )
+  }
+
   return (
-    <Table className='overflow-x-auto' aria-label='custom pagination table'>
+    <Table className='overflow-x-auto' aria-label='hippoland-table'>
+      <TableHeader headers={headers} onRequestSort={onRequestSort} order={order} orderBy={orderBy} />
       <TableBody>
         {rows.map(row => (
-          <TableRow key={row.name}>
-            <TableCell component='th' scope='row'>
-              {row.name}
-            </TableCell>
-            <TableCell>{row.url}</TableCell>
-            <TableCell>{row.image_url}</TableCell>
-            <TableCell>{row.price}</TableCell>
-            <TableCell>{row.date_created}</TableCell>
-          </TableRow>
+          <TableRow key={row.name}>{headers.map(renderTableCell(row))}</TableRow>
         ))}
 
         {emptyRows > 0 && (
@@ -45,7 +74,7 @@ const CustomPaginationTable= ({ rows, total, onPageChange }) => {
         <TableRow>
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
-            colSpan={3}
+            colSpan={headers.length}
             count={total}
             rowsPerPage={rowsPerPage}
             page={page}
